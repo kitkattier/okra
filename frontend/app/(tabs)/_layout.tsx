@@ -1,7 +1,7 @@
 import { Tabs } from "expo-router";
 import { useTheme, Text } from "tamagui";
 import { useEffect, useState } from "react";
-import { Home, Cat } from "@tamagui/lucide-icons";
+import { Home, Cat, Brush } from "@tamagui/lucide-icons";
 
 export default function TabLayout() {
   const theme = useTheme();
@@ -41,6 +41,13 @@ export default function TabLayout() {
           options={{
             title: "Example",
             tabBarIcon: () => <Cat />,
+          }}
+        />
+        <Tabs.Screen
+          name="Draw"
+          options={{
+            title: "Draw",
+            tabBarIcon: () => <Brush />,
           }}
         />
       </Tabs>
