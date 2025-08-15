@@ -1,5 +1,5 @@
 import React from "react";
-import { Anchor, H2, Paragraph, XStack, YStack, Text, Image } from "tamagui";
+import { H2, YStack, Image } from "tamagui";
 
 export default function TabOneScreen() {
   return (
