@@ -19,8 +19,6 @@ function MapComponent() {
       map.addLayer({
         id: "pixels",
         type: "raster",
-        // minzoom: 11,
-        // maxzoom: 11,
         source: {
           type: "raster",
           tiles: ["http://localhost:8000/static/tiles/{x}/{y}.png"],
@@ -33,14 +31,15 @@ function MapComponent() {
         },
       });
     });
+    const geolocate = new maplibregl.GeolocateControl({
+      positionOptions: { enableHighAccuracy: true },
+      trackUserLocation: true,
+    });
+    map.addControl(geolocate, "top-left");
 
-    map.addControl(
-      new maplibregl.GeolocateControl({
-        positionOptions: { enableHighAccuracy: true },
-        trackUserLocation: true,
-      }),
-      "top-left",
-    );
+    map.on("load", () => {
+      geolocate.trigger();
+    });
     return () => {
       map.remove();
     };
