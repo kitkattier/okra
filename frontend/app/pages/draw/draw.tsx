@@ -5,11 +5,13 @@ import { MapProvider } from "~/context/mapContext";
 
 const Draw: React.FC = () => {
   return (
-    <div className="min-h-screen py-3">
+    <div className="flex min-h-screen flex-col py-3">
+      <NavBar />
       <MapProvider>
-        <NavBar />
-        <MapComponent />
-        <PaintControls />
+        <div className="relative flex-1">
+          <MapComponent />
+          <PaintControls />
+        </div>
       </MapProvider>
     </div>
   );

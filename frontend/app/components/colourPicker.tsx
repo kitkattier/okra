@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import Circle from "@uiw/react-color-circle";
 
-function ColourPicker() {
+interface ColorPickerProps {
+  setRGB: (rgb: [number, number, number]) => void;
+}
+
+function ColourPicker({ setRGB }: ColorPickerProps) {
+  // TODO: Make initial state an input prop
   const [hex, setHex] = useState("#fff");
 
   function convertToRGB(hex: string) {
@@ -15,8 +20,7 @@ function ColourPicker() {
     const g = parseInt(ghex, 16);
     const b = parseInt(bhex, 16);
 
-    // do something with the rgb stuff sending to server or whatever here
-    // have vals for r g and b
+    setRGB([r, g, b]);
   }
 
   return (
@@ -58,6 +62,7 @@ function ColourPicker() {
         setHex(color.hex);
         convertToRGB(color.hex); // here for now but could use when u send to backend
       }}
+      className="items-center"
     />
   );
 }

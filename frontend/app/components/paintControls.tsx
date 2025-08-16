@@ -1,9 +1,12 @@
 import { API_URL, apiRequest } from "~/api";
 import { useMap } from "~/context/mapContext";
 import { latLonToTilePixel } from "~/utils";
+import ColourPicker from "./colourPicker";
+import { useState } from "react";
 
 const PaintControls = () => {
   const { mapRef } = useMap();
+  const [rgb, setRgb] = useState<[number, number, number]>([255, 255, 255]);
 
   async function paintCurrentLocation() {
     const map = mapRef.current;
@@ -11,7 +14,7 @@ const PaintControls = () => {
       async (pos) => {
         const { latitude, longitude } = pos.coords;
         const pt = latLonToTilePixel(latitude, longitude);
-        await apiRequest("pixel-change", "POST", { ...pt, color: [250, 0, 0] });
+        await apiRequest("pixel-change", "POST", { ...pt, color: rgb });
         map?.removeLayer("pixels");
         map?.removeSource("pixels");
         map?.addLayer({
@@ -35,8 +38,9 @@ const PaintControls = () => {
   }
 
   return (
-    <div className="absolute top-1/2 right-0 z-2 p-2">
-      <button className="btn btn-primary" onClick={paintCurrentLocation}>
+    <div className="absolute top-4 right-4 z-10 rounded-md bg-white/80 p-3 shadow-md backdrop-blur-md">
+      <ColourPicker setRGB={setRgb} />
+      <button className="btn btn-primary btn-square mt-5" onClick={paintCurrentLocation}>
         Paint
       </button>
     </div>
