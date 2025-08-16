@@ -6,12 +6,14 @@ import * as LocAR from "locar";
 
 const Ar: React.FC = () => {
   // logic
+
+  // window.innerHeight does not account for the navbar height
   useEffect(() => {
     const camera = new THREE.PerspectiveCamera(
-      80,
+      120,
       window.innerWidth / window.innerHeight,
       0.001,
-      1000,
+      100000,
     );
     //const camera = <PerspectiveCamera makeDefault {...props} />
 
@@ -55,42 +57,58 @@ const Ar: React.FC = () => {
 
     locar.on("gpsupdate", (pos: Position, distMoved: any) => {
       if (firstLocation) {
-        const boxProps = [
+        const planeProps = [
           {
-            latDis: 0.0005,
+            latDis: 0.0001,
             lonDis: 0,
             colour: 0xff0000,
           },
           {
-            latDis: -0.0005,
-            lonDis: 0,
+            latDis: 0.0001,
+            lonDis: 0.0001,
             colour: 0xffff00,
           },
           {
-            latDis: 0,
-            lonDis: -0.0005,
-            colour: 0x00ffff,
+            latDis: 0.0002,
+            lonDis: 0,
+            colour: 0xff00ff,
           },
           {
-            latDis: 0,
-            lonDis: 0.0005,
+            latDis: 0.0002,
+            lonDis: 0.0001,
             colour: 0x00ff00,
           },
         ];
 
-        const geom = new THREE.BoxGeometry(10, 10, 10);
+        const geom = new THREE.PlaneGeometry(11, 13);
 
-        for (const boxProp of boxProps) {
-          const mesh = new THREE.Mesh(geom, new THREE.MeshBasicMaterial({ color: boxProp.colour }));
+        const colours = [
+          0x00ff00, 0xff0000, 0xffff00, 0x00ffff, 0x0000ff, 0xff00ff, 0xffffff, 0x000000, 0xff8800,
+          0x0088ff,
+        ];
 
-          console.log(
-            `adding at ${pos.coords.longitude + boxProp.lonDis},${pos.coords.latitude + boxProp.latDis}`,
-          );
-          locar.add(
-            mesh,
-            pos.coords.longitude + boxProp.lonDis,
-            pos.coords.latitude + boxProp.latDis,
-          );
+        let N = 10;
+
+        for (let i = 0; i < N; i++) {
+          for (let j = 0; j < N; j++) {
+            const mesh = new THREE.Mesh(
+              geom,
+              new THREE.MeshBasicMaterial({
+                color: colours[(i + j) % 10],
+                transparent: true,
+                opacity: 0.5,
+              }),
+            );
+            //mesh.rotateX(Math.PI / 2);
+            mesh.rotateX(1.57);
+            mesh.translateY(80000);
+
+            locar.add(
+              mesh,
+              pos.coords.longitude + 0.0001 * (i - 5),
+              pos.coords.latitude + 0.0001 * (j - 5),
+            );
+          }
         }
 
         firstLocation = false;
