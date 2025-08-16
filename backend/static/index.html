@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Add a raster tile source</title>
+    <meta
+      property="og:description"
+      content="Add a third-party raster source to the map."
+    />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css"
+    />
+    <script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body,
+      #map {
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      const map = new maplibregl.Map({
+        container: "map", // container id
+        style: {
+          version: 8,
+          sources: {
+            "raster-tiles": {
+              type: "raster",
+              tiles: [
+                // NOTE: Layers from Stadia Maps do not require an API key for localhost development or most production
+                // web deployments. See https://docs.stadiamaps.com/authentication/ for details.
+                "https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg",
+              ],
+              tileSize: 256,
+              attribution:
+                'Map tiles by <a target="_blank" href="https://stamen.com">Stamen Design</a>; Hosting by <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a>. Data &copy; <a href="https://www.openstreetmap.org/about" target="_blank">OpenStreetMap</a> contributors',
+            },
+            pixels: {
+              type: "raster",
+              tiles: ["http://localhost:8000/static/tiles/{x}/{y}.png"],
+              minzoom: 11,
+              maxzoom: 11,
+              tileSize: 550,
+            },
+          },
+          layers: [
+            {
+              id: "simple-tiles",
+              type: "raster",
+              source: "raster-tiles",
+              minzoom: 0,
+              maxzoom: 22,
+            },
+            {
+              id: "pixels",
+              type: "raster",
+              source: "pixels",
+              paint: {
+                "raster-resampling": "nearest",
+              },
+            },
+          ],
+        },
+        center: [-74.5, 40], // starting position
+        zoom: 2, // starting zoom
+      });
+
+      function hr(r, f, i) {
+        var a = r == null ? "" : "" + r;
+        if ((f && (a = a ? a + " " + f : f), i)) {
+          for (var t in i)
+            if (i[t]) a = a ? a + " " + t : t;
+            else if (a.length)
+              for (var s = t.length, e = 0; (e = a.indexOf(t, e)) >= 0; ) {
+                var o = e + s;
+                (e === 0 || R.includes(a[e - 1])) &&
+                (o === a.length || R.includes(a[o]))
+                  ? (a =
+                      (e === 0 ? "" : a.substring(0, e)) + a.substring(o + 1))
+                  : (e = o);
+              }
+        }
+        return a === "" ? null : a;
+      }
+
+      const ws = (2 * Math.PI * 6378137) / 2;
+      class Converter {
+        constructor(l = 1000) {
+          hr(this, "initialResolution");
+          (this.tileSize = l),
+            (this.initialResolution = (2 * ws) / this.tileSize);
+        }
+        latLonToMeters(l, _) {
+          const T = (_ / 180) * ws,
+            z =
+              ((Math.log(Math.tan(((90 + l) * Math.PI) / 360)) /
+                (Math.PI / 180)) *
+                ws) /
+              180;
+          return [T, z];
+        }
+        metersToLatLon(l, _) {
+          const T = (l / ws) * 180;
+          let z = (_ / ws) * 180;
+          return (
+            (z =
+              (180 / Math.PI) *
+              (2 * Math.atan(Math.exp((z * Math.PI) / 180)) - Math.PI / 2)),
+            [z, T]
+          );
+        }
+        pixelsToMeters(l, _, T) {
+          const z = this.resolution(T),
+            F = l * z - ws,
+            C = ws - _ * z;
+          return [F, C];
+        }
+        pixelsToLatLon(l, _, T) {
+          const [z, F] = this.pixelsToMeters(l, _, T);
+          return this.metersToLatLon(z, F);
+        }
+        latLonToPixels(l, _, T) {
+          const [z, F] = this.latLonToMeters(l, _);
+          return this.metersToPixels(z, F, T);
+        }
+        latLonToPixelsFloor(l, _, T) {
+          const [z, F] = this.latLonToPixels(l, _, T);
+          return [Math.floor(z), Math.floor(F)];
+        }
+        metersToPixels(l, _, T) {
+          const z = this.resolution(T),
+            F = (l + ws) / z,
+            C = (ws - _) / z;
+          return [F, C];
+        }
+        latLonToTile(l, _, T) {
+          const [z, F] = this.latLonToMeters(l, _);
+          return this.metersToTile(z, F, T);
+        }
+        metersToTile(l, _, T) {
+          const [z, F] = this.metersToPixels(l, _, T);
+          return this.pixelsToTile(z, F);
+        }
+        pixelsToTile(l, _) {
+          const T = Math.ceil(l / this.tileSize) - 1,
+            z = Math.ceil(_ / this.tileSize) - 1;
+          return [T, z];
+        }
+        pixelsToTileLocal(l, _) {
+          return {
+            tile: this.pixelsToTile(l, _),
+            pixel: [
+              Math.floor(l) % this.tileSize,
+              Math.floor(_) % this.tileSize,
+            ],
+          };
+        }
+        tileBounds(l, _, T) {
+          const [z, F] = this.pixelsToMeters(
+              l * this.tileSize,
+              _ * this.tileSize,
+              T,
+            ),
+            [C, o] = this.pixelsToMeters(
+              (l + 1) * this.tileSize,
+              (_ + 1) * this.tileSize,
+              T,
+            );
+          return {
+            min: [z, F],
+            max: [C, o],
+          };
+        }
+        tileBoundsLatLon(l, _, T) {
+          const z = this.tileBounds(l, _, T);
+          return {
+            min: this.metersToLatLon(z.min[0], z.min[1]),
+            max: this.metersToLatLon(z.max[0], z.max[1]),
+          };
+        }
+        resolution(l) {
+          return this.initialResolution / 2 ** l;
+        }
+        latLonToTileAndPixel(l, _, T) {
+          const [z, F] = this.latLonToMeters(l, _),
+            [C, o] = this.metersToTile(z, F, T),
+            [W, G] = this.metersToPixels(z, F, T);
+          return {
+            tile: [C, o],
+            pixel: [
+              Math.floor(W) % this.tileSize,
+              Math.floor(G) % this.tileSize,
+            ],
+          };
+        }
+        pixelBounds(l, _, T) {
+          return {
+            min: this.pixelsToMeters(l, _, T),
+            max: this.pixelsToMeters(l + 1, _ + 1, T),
+          };
+        }
+        pixelToBoundsLatLon(l, _, T) {
+          const z = this.pixelBounds(l, _, T),
+            F = 0.001885,
+            C = (z.max[0] - z.min[0]) * F,
+            o = (z.max[1] - z.min[1]) * F;
+          return (
+            (z.min[0] -= C),
+            (z.max[0] -= C),
+            (z.min[1] -= o),
+            (z.max[1] -= o),
+            {
+              min: this.metersToLatLon(z.min[0], z.min[1]),
+              max: this.metersToLatLon(z.max[0], z.max[1]),
+            }
+          );
+        }
+        latLonToTileBoundsLatLon(l, _, T) {
+          const [z, F] = this.latLonToMeters(l, _),
+            [C, o] = this.metersToTile(z, F, T);
+          return this.tileBoundsLatLon(C, o, T);
+        }
+        latLonToPixelBoundsLatLon(l, _, T) {
+          const [z, F] = this.latLonToMeters(l, _),
+            [C, o] = this.metersToPixels(z, F, T);
+          return this.pixelToBoundsLatLon(Math.floor(C), Math.floor(o), T);
+        }
+        latLonToRegionAndPixel(l, _, T, z = On.regionSize) {
+          const [F, C] = this.latLonToPixelsFloor(l, _, T),
+            o = this.tileSize * z;
+          return {
+            region: [Math.floor(F / o), Math.floor(C / o)],
+            pixel: [F % o, C % o],
+          };
+        }
+      }
+    </script>
+  </body>
+</html>
