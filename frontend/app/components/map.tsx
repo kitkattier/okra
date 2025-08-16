@@ -21,7 +21,7 @@ function MapComponent() {
         type: "raster",
         source: {
           type: "raster",
-          tiles: ["http://localhost:8000/static/tiles/{x}/{y}.png"],
+          tiles: ["https://10.89.70.23:8000/static/tiles/{x}/{y}.png"],
           minzoom: 11,
           maxzoom: 11,
           tileSize: 550,

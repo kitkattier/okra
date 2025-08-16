@@ -4,8 +4,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from PIL import Image
 import os
+import uvicorn
+import ssl
 
 app = FastAPI()
+
+ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+ssl_context.load_cert_chain('./cert.pem', keyfile='./key.pem')
 
 origins = [
     "http://localhost.tiangolo.com", "https://localhost.tiangolo.com",
@@ -45,3 +50,6 @@ def pixel_change(pixel: PixelChange):
 
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="10.89.70.23", port=8000, ssl_keyfile="./key.pem", ssl_certfile="./cert.pem")
