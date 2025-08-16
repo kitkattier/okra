@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import NavBar from "~/components/navBar";
 import * as THREE from "three";
 import * as LocAR from "locar";
+import DeviceOrientationControls from "./meowl";
 //import { Canvas } from '@react-three/fiber'
 
 const Ar: React.FC = () => {
@@ -46,7 +47,7 @@ const Ar: React.FC = () => {
 
     let firstLocation = true;
 
-    let deviceOrientationControls = new LocAR.DeviceOrientationControls(camera);
+    let deviceOrientationControls = new DeviceOrientationControls(camera);
 
     type Position = {
       coords: {
@@ -120,6 +121,7 @@ const Ar: React.FC = () => {
     renderer.setAnimationLoop(animate);
 
     function animate() {
+      // @ts-ignore
       deviceOrientationControls?.update();
       renderer.render(scene, camera);
     }
