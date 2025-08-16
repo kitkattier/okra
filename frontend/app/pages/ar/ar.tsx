@@ -81,14 +81,14 @@ const Ar: React.FC = () => {
           },
         ];
 
-        const geom = new THREE.PlaneGeometry(11, 13);
+        const geom = new THREE.PlaneGeometry(11, 12.5);
 
         const colours = [
           0x00ff00, 0xff0000, 0xffff00, 0x00ffff, 0x0000ff, 0xff00ff, 0xffffff, 0x000000, 0xff8800,
           0x0088ff,
         ];
 
-        let N = 10;
+        let N = 20;
 
         for (let i = 0; i < N; i++) {
           for (let j = 0; j < N; j++) {
@@ -97,17 +97,17 @@ const Ar: React.FC = () => {
               new THREE.MeshBasicMaterial({
                 color: colours[(i + j) % 10],
                 transparent: true,
-                opacity: 0.5,
+                opacity: 1.0 - (Math.abs(i - 10) + Math.abs(j - 10)) * 0.05,
               }),
             );
             //mesh.rotateX(Math.PI / 2);
             mesh.rotateX(1.57);
-            mesh.translateY(80000);
+            mesh.translateY(75000);
 
             locar.add(
               mesh,
-              pos.coords.longitude + 0.0001 * (i - 5),
-              pos.coords.latitude + 0.0001 * (j - 5),
+              pos.coords.longitude + 0.0001 * (i - 10),
+              pos.coords.latitude + 0.0001 * (j - 10),
             );
           }
         }
