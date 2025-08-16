@@ -18,9 +18,9 @@ const NavBar: React.FC = () => {
           <span className="dock-label">Home</span>
         </Link>
 
-        <Link to="/map" className={path === "/map" ? currentStyle : ""}>
+        <Link to="/ar" className={path === "/ar" ? currentStyle : ""}>
           <Map className="size-[1.2em]" />
-          <span className="dock-label">Map</span>
+          <span className="dock-label">AR View</span>
         </Link>
       </div>
     </>
