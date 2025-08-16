@@ -12,8 +12,9 @@ const Home: React.FC = () => {
   return (
     <>
       <NavBar />
+
       <div className="flex min-h-screen flex-row items-center justify-center">
-        {clickCount >= 5 && (
+        {/* {clickCount >= 5 && (
           <motion.img
             src={meowl}
             alt="meowl"
@@ -22,7 +23,7 @@ const Home: React.FC = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ type: "spring", stiffness: 200 }}
           />
-        )}
+        )} */}
         <div className="flex flex-col items-center justify-center">
           <header className="mb-10 text-center">
             <h1 className="text-3xl font-semibold text-zinc-800 md:text-7xl dark:text-zinc-200">
