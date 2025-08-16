@@ -1,5 +1,5 @@
-import type { Route } from "./+types/draw";
-import Draw from "~/pages/draw/draw";
+import type { Route } from "./+types/ar";
+import Ar from "~/pages/ar/ar";
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: "Meowlytics" }, { name: "description", content: "Welcome to Meowlytics!" }];
@@ -8,7 +8,7 @@ export function meta({}: Route.MetaArgs) {
 export default function DrawRoute() {
   return (
     <>
-      <Draw />
+      <Ar />
     </>
   );
 }
