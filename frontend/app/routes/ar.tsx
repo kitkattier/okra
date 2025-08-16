@@ -8,7 +8,7 @@ export function meta({}: Route.MetaArgs) {
 export default function DrawRoute() {
   return (
     <>
-      <Ar imagePath="1186.png" />
+      <Ar />
     </>
   );
 }

@@ -1,4 +1,4 @@
-import { API_URL, apiRequest } from "~/api";
+import { apiRequest, TILE_PATH } from "~/api";
 import { useMap } from "~/context/mapContext";
 import { latLonToTilePixel } from "~/utils";
 import ColourPicker from "./colourPicker";
@@ -22,7 +22,7 @@ const PaintControls = () => {
           type: "raster",
           source: {
             type: "raster",
-            tiles: [API_URL + "static/tiles/{x}/{y}.png"],
+            tiles: [TILE_PATH],
             minzoom: 11,
             maxzoom: 11,
             tileSize: 550,

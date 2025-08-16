@@ -1,4 +1,5 @@
 export const API_URL = "https://192.168.150.141:8000/";
+export const TILE_PATH = API_URL + "static/tiles/{x}/{y}.png";
 
 export type Method = "GET" | "POST" | "PATCH" | "DELETE";
 

@@ -1,14 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import NavBar from "~/components/navBar";
 import * as THREE from "three";
 import * as LocAR from "locar";
 import DeviceOrientationControls from "./meowl";
+import { latLonToTilePixel } from "~/utils";
+import { TILE_PATH } from "~/api";
 
-interface ArProps {
-  imagePath?: string; // Optional image path prop
-}
+const Ar: React.FC = () => {
+  const [log, setLog] = useState("Log");
 
-const Ar: React.FC<ArProps> = ({ imagePath }) => {
   useEffect(() => {
     const camera = new THREE.PerspectiveCamera(
       120,
@@ -54,47 +54,50 @@ const Ar: React.FC<ArProps> = ({ imagePath }) => {
 
     // Function to create image-based AR object
     const createImagePlane = (position: Position) => {
-      if (imagePath) {
-        // Load texture from image path
-        const textureLoader = new THREE.TextureLoader();
-        console.log("Loading image from path:", imagePath);
-        textureLoader.load(
-          imagePath,
-          (texture) => {
-            // Get image dimensions to maintain aspect ratio
-            const image = texture.image;
-            const aspectRatio = image.width / image.height;
+      const { tile } = latLonToTilePixel(position.coords.latitude, position.coords.longitude);
+      const imagePath = TILE_PATH.replace("{x}", tile[0].toString()).replace(
+        "{y}",
+        tile[1].toString(),
+      );
 
-            // Create geometry based on aspect ratio
-            const width = 50000; // Base width
-            const height = width / aspectRatio;
-            const geom = new THREE.PlaneGeometry(width, height);
+      // Load texture from image path
+      const textureLoader = new THREE.TextureLoader();
+      setLog((l) => l + "Loading image from path:" + imagePath);
+      textureLoader.load(
+        imagePath,
+        (texture) => {
+          setLog((l) => l + "\nloaded");
+          // Get image dimensions to maintain aspect ratio
+          const image = texture.image;
+          const aspectRatio = image.width / image.height;
 
-            const material = new THREE.MeshBasicMaterial({
-              map: texture,
-              transparent: true,
-              opacity: 1,
-              
-            });
+          // Create geometry based on aspect ratio
+          const width = 50000; // Base width
+          const height = width / aspectRatio;
+          const geom = new THREE.PlaneGeometry(width, height);
 
-            const mesh = new THREE.Mesh(geom, material);
-            mesh.rotateX(1.57); // Rotate to lay flat
-            mesh.translateY(1500000); // Elevate
+          const material = new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true,
+            opacity: 1,
+          });
 
-            // Add to AR scene at GPS location
-            locar.add(mesh, position.coords.longitude, position.coords.latitude);
-          },
-          undefined,
-          (error) => {
-            console.error("Error loading image:", error);
-            // Fallback to original pixel grid if image fails to load
-            createPixelGrid(position);
-          },
-        );
-      } else {
-        // Fallback to original pixel grid if no image path provided
-        createPixelGrid(position);
-      }
+          const mesh = new THREE.Mesh(geom, material);
+          mesh.rotateX(1.57); // Rotate to lay flat
+          mesh.translateY(1500000); // Elevate
+
+          // Add to AR scene at GPS location
+          locar.add(mesh, position.coords.longitude, position.coords.latitude);
+          setLog((l) => l + "\got to the end");
+        },
+        undefined,
+        (error) => {
+          setLog((l) => l + "Error loading image:" + error);
+          // Fallback to original pixel grid if image fails to load
+          createPixelGrid(position);
+        },
+      );
+      setLog((l) => l + "\nGot here");
     };
 
     // Original pixel grid function as fallback
@@ -177,12 +180,13 @@ const Ar: React.FC<ArProps> = ({ imagePath }) => {
       deviceOrientationControls?.update();
       renderer.render(scene, camera);
     }
-  }, [imagePath]); // Add imagePath to dependency array
+  }, []);
 
   return (
     <div className="min-h-screen py-3">
       <canvas id="glscene"></canvas>
       <NavBar />
+      <div className="absolute top-1 right-1 overflow-hidden">{log}</div>
     </div>
   );
 };

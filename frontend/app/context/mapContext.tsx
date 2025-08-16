@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef, type ReactNode } from "react";
 import maplibregl from "maplibre-gl";
-import { API_URL } from "~/api";
+import { TILE_PATH } from "~/api";
 
 interface MapContextType {
   mapRef: React.RefObject<maplibregl.Map | null>;
@@ -33,7 +33,7 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children }) => {
         type: "raster",
         source: {
           type: "raster",
-          tiles: [API_URL + "static/tiles/{x}/{y}.png"],
+          tiles: [TILE_PATH],
           minzoom: 11,
           maxzoom: 11,
           tileSize: 550,
