@@ -1,0 +1,69 @@
+import React, { type CSSProperties, useCallback } from "react";
+import type { SwatchRectRenderProps, SwatchProps } from "@uiw/react-color-swatch";
+import { useRef } from "react";
+
+interface PointProps extends SwatchRectRenderProps {
+  rectProps?: SwatchProps["rectProps"];
+  className?: string;
+}
+
+export default function Point({
+  style,
+  className,
+  title,
+  checked,
+  color,
+  onClick,
+  rectProps,
+}: PointProps) {
+  const btn = useRef<HTMLDivElement>(null);
+  const handleMouseEnter = useCallback(() => {
+    btn.current!.style["transform"] = "scale(1.2)";
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    btn.current!.style["transform"] = "scale(1)";
+  }, []);
+
+  let width = rectProps?.style?.width || "100%";
+  let height = rectProps?.style?.height || "100%";
+  const styleWrapper = {
+    "--circle-point-background-color": "#fff",
+    backgroundColor: "var(--circle-point-background-color)",
+    boxSizing: "border-box",
+    transition: "height 100ms ease 0s, width 100ms ease 0s",
+    ...rectProps!.style,
+    borderRadius: rectProps?.style?.borderRadius || "50%",
+    height: checked ? height : 0,
+    width: checked ? width : 0,
+  } as CSSProperties;
+
+  return (
+    <div
+      ref={btn}
+      onClick={onClick}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      title={title}
+      className={className}
+      style={{
+        padding: 3,
+        marginRight: 12,
+        marginBottom: 12,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 28,
+        height: 28,
+        borderRadius: "50%",
+        boxSizing: "border-box",
+        transform: "scale(1)",
+        transition: "transform 100ms ease 0s, box-shadow 100ms ease 0s",
+        ...style,
+        boxShadow: `${color} 0px 0px ${checked ? 5 : 0}px`,
+      }}
+    >
+      <div {...rectProps} style={styleWrapper} />
+    </div>
+  );
+}
