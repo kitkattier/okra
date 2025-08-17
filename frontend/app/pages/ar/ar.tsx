@@ -139,11 +139,11 @@ const Ar: React.FC = () => {
         // for (let i = -N; i <= N; i++) {
         // for (let j = -(10 - Math.abs(i)); j <= 10 - Math.abs(i); j++) {
 
-        let N = 20;
+        let N = 50;
         for (let i = -N; i <= N; i++) {
           for (let j = -N; j <= N; j++) {
             const x = pixel[0] + i;
-            const y = pixel[1] + j;
+            const y = pixel[1] - j;
             //const index = (y * imageData.width + x) * 4;
             const index = (y * 1000 + x) * 4;
             const red = pixelData[index];
@@ -156,14 +156,14 @@ const Ar: React.FC = () => {
               continue;
             }
 
-            const color = new THREE.Color().setRGB(red, green, blue);
+            const color = new THREE.Color().setRGB(red / 255, green / 255, blue / 255);
 
             const mesh = new THREE.Mesh(
               geom,
               new THREE.MeshBasicMaterial({
                 color: color,
                 transparent: true,
-                opacity: 1.0 - Math.sqrt(i * i + j * j) * 0.05,
+                opacity: 1.0 - Math.sqrt(i * i + j * j) * 0.02,
               }),
             );
             mesh.rotateX(1.57);
