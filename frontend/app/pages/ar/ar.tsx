@@ -98,29 +98,86 @@ const Ar: React.FC = () => {
 
     // Original pixel grid function as fallback
     const createPixelGrid = (position: Position) => {
+      const { tile, pixel } = latLonToTilePixel(
+        position.coords.latitude,
+        position.coords.longitude,
+      );
+      //console.log(pixel);
+      //setLog(pixel[1].toString());
+      const imagePath = TILE_PATH.replace("{x}", tile[0].toString()).replace(
+        "{y}",
+        tile[1].toString(),
+      );
+
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        throw new Error("Could not get 2D rendering context");
+      }
+      const img = new Image();
+      img.crossOrigin = "Anonymous"; // Important for images loaded from different origins
+      img.src = imagePath; // Replace with your image path
+      //img.src = "~/meowl.png";
+      //setLog(img.src);
+
+      //let thisPixel: any = 0;
+
+      let pixelData: Uint8ClampedArray = new Uint8ClampedArray();
+      let imageData: ImageData;
+
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+
+        imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        pixelData = imageData.data; // This is the raw pixel array
+        // Each pixel is represented by 4 consecutive values: Red, Green, Blue, Alpha (RGBA)
+        // Values range from 0 to 255
+      };
+
+      //pixelData = new Uint8ClampedArray(arr);
+
+      //thisPixel = pixelData[pixel[0]][pixel[1]];
+
       const geom = new THREE.PlaneGeometry(11, 12.5);
-      const colours = [
-        0x00ff00, 0xff0000, 0xffff00, 0x00ffff, 0x0000ff, 0xff00ff, 0xffffff, 0x000000, 0xff8800,
-        0x0088ff,
-      ];
+
+      // for (let i = -N; i <= N; i++) {
+      // for (let j = -(10 - Math.abs(i)); j <= 10 - Math.abs(i); j++) {
 
       let N = 20;
-      for (let i = 0; i < N; i++) {
-        for (let j = 0; j < N; j++) {
+      for (let i = -N; i <= N; i++) {
+        for (let j = -N; j <= N; j++) {
+          const x = pixel[0] + i;
+          const y = pixel[1] + j;
+          //const index = (y * imageData.width + x) * 4;
+          const index = (y * 256 + x) * 4;
+          const red = pixelData[index];
+          //const red = 255;
+          const green = pixelData[index + 1];
+          const blue = pixelData[index + 2];
+          const alpha = pixelData[index + 3];
+
+          if (alpha == 0) {
+            continue;
+          }
+
+          const color = new THREE.Color().setRGB(red, green, blue);
+
           const mesh = new THREE.Mesh(
             geom,
             new THREE.MeshBasicMaterial({
-              color: colours[(i + j) % 10],
+              color: color,
               transparent: true,
-              opacity: 1.0 - (Math.abs(i - 10) + Math.abs(j - 10)) * 0.05,
+              opacity: 1.0 - Math.sqrt(i * i + j * j) * 0.05,
             }),
           );
           mesh.rotateX(1.57);
           mesh.translateY(200000);
           locar.add(
             mesh,
-            position.coords.longitude + 0.0001 * (i - 10),
-            position.coords.latitude + 0.0001 * (j - 10),
+            position.coords.longitude + 0.0001 * i,
+            position.coords.latitude + 0.0001 * j,
           );
         }
       }
@@ -128,7 +185,8 @@ const Ar: React.FC = () => {
 
     locar.on("gpsupdate", (pos: Position, distMoved: any) => {
       if (firstLocation) {
-        createImagePlane(pos);
+        //createImagePlane(pos);
+        createPixelGrid(pos);
         firstLocation = false;
       }
     });
