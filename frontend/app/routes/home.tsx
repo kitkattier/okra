@@ -3,7 +3,10 @@ import type { Route } from "./+types/home";
 import Home from "~/pages/home/home";
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "Meowlytics" }, { name: "description", content: "Welcome to Meowlytics!" }];
+  return [
+    { title: "MeowlPlace" },
+    { name: "description", content: "Welcome to MeowPlace! I love meowlplace" },
+  ];
 }
 
 export default function HomeRoute() {
