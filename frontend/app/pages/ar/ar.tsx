@@ -7,7 +7,7 @@ import { latLonToTilePixel } from "~/utils";
 import { TILE_PATH } from "~/api";
 
 const Ar: React.FC = () => {
-  const [log, setLog] = useState("Log");
+  const [log, setLog] = useState("loading");
 
   useEffect(() => {
     const camera = new THREE.PerspectiveCamera(
@@ -62,11 +62,9 @@ const Ar: React.FC = () => {
 
       // Load texture from image path
       const textureLoader = new THREE.TextureLoader();
-      setLog((l) => l + "Loading image from path:" + imagePath);
       textureLoader.load(
         imagePath,
         (texture) => {
-          setLog((l) => l + "\nloaded");
           // Get image dimensions to maintain aspect ratio
           const image = texture.image;
           const aspectRatio = image.width / image.height;
@@ -88,16 +86,14 @@ const Ar: React.FC = () => {
 
           // Add to AR scene at GPS location
           locar.add(mesh, position.coords.longitude, position.coords.latitude);
-          setLog((l) => l + "\got to the end");
+          setLog("");
         },
         undefined,
         (error) => {
-          setLog((l) => l + "Error loading image:" + error);
-          // Fallback to original pixel grid if image fails to load
-          createPixelGrid(position);
+          console.error(error);
+          setLog("");
         },
       );
-      setLog((l) => l + "\nGot here");
     };
 
     // Original pixel grid function as fallback
