@@ -134,53 +134,53 @@ const Ar: React.FC = () => {
         pixelData = imageData.data; // This is the raw pixel array
         // Each pixel is represented by 4 consecutive values: Red, Green, Blue, Alpha (RGBA)
         // Values range from 0 to 255
+        const geom = new THREE.PlaneGeometry(11, 12.5);
+
+        // for (let i = -N; i <= N; i++) {
+        // for (let j = -(10 - Math.abs(i)); j <= 10 - Math.abs(i); j++) {
+
+        let N = 20;
+        for (let i = -N; i <= N; i++) {
+          for (let j = -N; j <= N; j++) {
+            const x = pixel[0] + i;
+            const y = pixel[1] + j;
+            //const index = (y * imageData.width + x) * 4;
+            const index = (y * 1000 + x) * 4;
+            const red = pixelData[index];
+            //const red = 255;
+            const green = pixelData[index + 1];
+            const blue = pixelData[index + 2];
+            const alpha = pixelData[index + 3];
+
+            if (alpha == 0) {
+              continue;
+            }
+
+            const color = new THREE.Color().setRGB(red, green, blue);
+
+            const mesh = new THREE.Mesh(
+              geom,
+              new THREE.MeshBasicMaterial({
+                color: color,
+                transparent: true,
+                opacity: 1.0 - Math.sqrt(i * i + j * j) * 0.05,
+              }),
+            );
+            mesh.rotateX(1.57);
+            mesh.translateY(200000);
+            locar.add(
+              mesh,
+              position.coords.longitude + 0.0001 * i,
+              position.coords.latitude + 0.0001 * j,
+            );
+          }
+        }
+        setLog("");
       };
 
       //pixelData = new Uint8ClampedArray(arr);
 
       //thisPixel = pixelData[pixel[0]][pixel[1]];
-
-      const geom = new THREE.PlaneGeometry(11, 12.5);
-
-      // for (let i = -N; i <= N; i++) {
-      // for (let j = -(10 - Math.abs(i)); j <= 10 - Math.abs(i); j++) {
-
-      let N = 20;
-      for (let i = -N; i <= N; i++) {
-        for (let j = -N; j <= N; j++) {
-          const x = pixel[0] + i;
-          const y = pixel[1] + j;
-          //const index = (y * imageData.width + x) * 4;
-          const index = (y * 256 + x) * 4;
-          const red = pixelData[index];
-          //const red = 255;
-          const green = pixelData[index + 1];
-          const blue = pixelData[index + 2];
-          const alpha = pixelData[index + 3];
-
-          if (alpha == 0) {
-            continue;
-          }
-
-          const color = new THREE.Color().setRGB(red, green, blue);
-
-          const mesh = new THREE.Mesh(
-            geom,
-            new THREE.MeshBasicMaterial({
-              color: color,
-              transparent: true,
-              opacity: 1.0 - Math.sqrt(i * i + j * j) * 0.05,
-            }),
-          );
-          mesh.rotateX(1.57);
-          mesh.translateY(200000);
-          locar.add(
-            mesh,
-            position.coords.longitude + 0.0001 * i,
-            position.coords.latitude + 0.0001 * j,
-          );
-        }
-      }
     };
 
     locar.on("gpsupdate", (pos: Position, distMoved: any) => {
