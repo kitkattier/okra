@@ -42,12 +42,23 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children }) => {
           "raster-resampling": "nearest",
         },
       });
+      // map.addLayer({
+      //   type: "circle",
+      //   id: "radius",
+      //   paint: {
+      //     "circle-radius": 30,
+      //   },
+      // });
     });
     const geolocate = new maplibregl.GeolocateControl({
       positionOptions: { enableHighAccuracy: true },
       trackUserLocation: true,
+      showAccuracyCircle: false,
     });
     map.addControl(geolocate, "top-left");
+    geolocate.on("geolocate", (e) => {
+      // map.getSOure
+    });
 
     map.on("load", () => {
       geolocate.trigger();
