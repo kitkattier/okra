@@ -53,7 +53,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 if __name__ == "__main__":
     uvicorn.run("main:app",
-                host="192.168.150.141",
+                host="10.89.70.23",
                 port=8000,
                 ssl_keyfile="./key.pem",
                 ssl_certfile="./cert.pem")
